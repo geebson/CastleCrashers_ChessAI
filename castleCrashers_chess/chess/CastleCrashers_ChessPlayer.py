@@ -2,6 +2,7 @@
 import random
 
 from chess_player import ChessPlayer
+from copy import deepcopy
 
 class CastleCrashers_ChessPlayer(ChessPlayer):
 
@@ -18,6 +19,10 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             best_score = 10000
             isMazimizing = False
 
+        #setup board and moves
+        board_copy = deepcopy(self.board)
+        possible_moves = board_copy.get_all_available_legal_moves(self.color)
+        print(possible_moves)
         return random.choice(
             self.board.get_all_available_legal_moves(self.color))
 
