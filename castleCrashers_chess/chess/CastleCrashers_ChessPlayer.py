@@ -6,9 +6,27 @@ from chess_player import ChessPlayer
 class CastleCrashers_ChessPlayer(ChessPlayer):
     def __init__(self, board, color):
         super().__init__(board,color)
-    
+        #map a dictionary for all of the piece values
+        self.piece_dictionary = {'P': 1,'N': 3,'B': 3,'R': 5,'Q': 9,'K': 10000}
+        
         self.maxDepth = 1
     def evalFunction(self,board):
+        #some kind of rating system for each piece
+        #put all of the white pieces in one array
+        white_positions = board.all_occupied_positions('white')
+        #white_score = []
+        sum=0
+        print('White piece values: ')
+        for position in white_positions:
+            piece = board[position]
+            piece = piece.get_notation().upper()
+            value = self.piece_dictionary[piece]
+            white_evaluation += value
+        print('Sum value of white: ',white_evaluation)
+        #put all of the black pieces in another array
+        #black_positions = self.all_occupied_positions('black')
+        #loop through both and sum the values of the pieces
+        #score = white pieces - black pieces
         return 0
     
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
