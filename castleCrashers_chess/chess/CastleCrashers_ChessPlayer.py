@@ -14,15 +14,19 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #some kind of rating system for each piece
         #put all of the white pieces in one array
         white_positions = board.all_occupied_positions('white')
-        #white_score = []
-        sum=0
-        print('White piece values: ')
+        black_positions = board.all_occupied_positions('black')
+        white_evaluation=0
+        black_evaluation=0
         for position in white_positions:
             piece = board[position]
             piece = piece.get_notation().upper()
             value = self.piece_dictionary[piece]
             white_evaluation += value
-        print('Sum value of white: ',white_evaluation)
+        for position in black_positions:
+            piece = board[position]
+            piece = piece.get_notation().upper()
+            value = self.piece_dictionary[piece]
+            black_evaluation += value
         #put all of the black pieces in another array
         #black_positions = self.all_occupied_positions('black')
         #loop through both and sum the values of the pieces
