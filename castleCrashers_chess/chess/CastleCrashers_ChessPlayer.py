@@ -16,6 +16,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #some kind of rating system for each piece
         white_positions = board.all_occupied_positions('white')
         black_positions = board.all_occupied_positions('black')
+        print(black_positions)
         white_evaluation=0
         black_evaluation=0
         #loop through the piece positions for each player, getting the piece type and summing the corresponding values
@@ -46,7 +47,11 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #check where the column is
         #check where the row is
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
-        print(defense_row_b)
+        for i in range(-1,2):
+            defense_col_b = self.column_array[(self.column_array.index(king_col_b))-i]
+            print(defense_col_b)
+            if (defense_col_b + defense_row_b) in black_positions:
+                print(defense_col_b,defense_row_b, ' occupied')
         return score
     
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
@@ -85,7 +90,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         
         if (depth == self.maxDepth):
             evaluation = self.evalFunction(board)
-            print(evaluation)
+            #print(evaluation)
             return evaluation
         
         if(isMaximizing):
