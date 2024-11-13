@@ -7,7 +7,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
     def __init__(self, board, color):
         super().__init__(board,color)
         #map a dictionary for all of the piece values
-        self.piece_dictionary = {'P': 1,'N': 3,'B': 3,'R': 5,'Q': 9,'K': 10000}
+        self.piece_dictionary = {'P': 10,'N': 30,'B': 30,'R': 50,'Q': 90,'K': 10000}
         self.column_array = ['a','b','c','d','e','f','g','h']
         self.row_array = ['1','2','3','4','5','6','7','8']
         
@@ -35,7 +35,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
                 king_position_b = position
             value = self.piece_dictionary[piece]
             black_evaluation += value
-        score = (white_evaluation - black_evaluation)
+        
         #print('King position white: ', king_position_w)
         print('King position black: ', king_position_b)
         #check the three spaces below the black king and three spaces above the white king
@@ -49,9 +49,18 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
         for i in range(-1,2):
             defense_col_b = self.column_array[(self.column_array.index(king_col_b))-i]
-            print(defense_col_b)
             if (defense_col_b + defense_row_b) in black_positions:
                 print(defense_col_b,defense_row_b, ' occupied')
+                black_evaluation += 1
+
+        defense_row_w = self.row_array[(self.row_array.index(king_row_w))+1]
+        for i in range(-1,2):
+            defense_col_w = self.column_array[(self.column_array.index(king_col_w))-i]
+            if (defense_col_w + defense_row_w) in white_positions:
+                print(defense_col_w,defense_row_w, ' occupied')
+                white_evaluation += 1
+
+        score = (white_evaluation - black_evaluation)
         return score
     
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
