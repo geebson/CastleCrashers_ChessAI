@@ -13,21 +13,22 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         
         self.maxDepth = 1
     def evalFunction(self,board):
-        #some kind of rating system for each piece
+
         white_positions = board.all_occupied_positions('white')
         black_positions = board.all_occupied_positions('black')
         print(black_positions)
         white_evaluation=0
         black_evaluation=0
-        #loop through the piece positions for each player, getting the piece type and summing the corresponding values
+    #Material Evaluation
+        #loop through the pieces for each player, getting the type of pieces and summing their values
         for position in white_positions:
             piece = board[position]
             piece = piece.get_notation().upper()
-            #save the position of the king to use for evaluation later
-            if (piece == 'K'):
+            if (piece == 'K'): #save the position of the king to use for evaluation later
                 king_position_w = position
             value = self.piece_dictionary[piece]
             white_evaluation += value
+
         for position in black_positions:
             piece = board[position]
             piece = piece.get_notation().upper()
@@ -36,30 +37,31 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             value = self.piece_dictionary[piece]
             black_evaluation += value
         
-        #print('King position white: ', king_position_w)
-        print('King position black: ', king_position_b)
-        #check the three spaces below the black king and three spaces above the white king
-        #get the row and column of both kings
+    #King's Defense evaluation
+        #get the king's positions
         king_row_b = king_position_b[1]
         king_col_b = king_position_b[0]
         king_row_w = king_position_w[1]
         king_col_w = king_position_w[0]
-        #check where the column is
-        #check where the row is
+        #get the row below the black king
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
+        #check the 3 spaces around the king in that row
         for i in range(-1,2):
-            defense_col_b = self.column_array[(self.column_array.index(king_col_b))-i]
-            if (defense_col_b + defense_row_b) in black_positions:
-                print(defense_col_b,defense_row_b, ' occupied')
-                black_evaluation += 1
+            #make sure it's a possible space on the board before checking
+            if self.column_array.index(king_col_b)-i in range(len(self.column_array)):
+                defense_col_b = self.column_array[(self.column_array.index(king_col_b))-i]
+                #if the space is occupied by a black piece add 1 to black's score
+                if (defense_col_b + defense_row_b) in black_positions:
+                    black_evaluation += 1
 
+        #follow the same evaluation steps for white's king defense
         defense_row_w = self.row_array[(self.row_array.index(king_row_w))+1]
         for i in range(-1,2):
-            defense_col_w = self.column_array[(self.column_array.index(king_col_w))-i]
-            if (defense_col_w + defense_row_w) in white_positions:
-                print(defense_col_w,defense_row_w, ' occupied')
-                white_evaluation += 1
-
+            if self.column_array.index(king_col_w)-i in range(len(self.column_array)):
+                defense_col_w = self.column_array[(self.column_array.index(king_col_w))-i]
+                if (defense_col_w + defense_row_w) in white_positions:
+                    white_evaluation += 1
+    
         score = (white_evaluation - black_evaluation)
         return score
     
@@ -69,7 +71,6 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         legal_moves = boardcopy.get_all_available_legal_moves(self.color)
         print(legal_moves)
         if(self.color == 'white'):
-      
             bestscore = -1000000000000
             for x in legal_moves:
                 boardcopy = deepcopy(self.board)
@@ -91,7 +92,6 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             return bestMove            
                 
     def minimax(self, board, depth, isMaximizing):
-        legal_moves = board.get_all_available_legal_moves(self.color)
         if (board.is_king_in_checkmate("white")):
             score = -1000000
         elif(board.is_king_in_checkmate("black")):
@@ -103,6 +103,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             return evaluation
         
         if(isMaximizing):
+            legal_moves = board.get_all_available_legal_moves('black')
             bestScore = -1000000000000  
             for x in legal_moves:
                 boardcopy = deepcopy(board)
@@ -111,6 +112,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
                 bestScore = max(score, bestScore)
             return bestScore           
         else:
+            legal_moves = board.get_all_available_legal_moves('white')
             bestScore = 1000000000000
             for x in legal_moves:
                 boardcopy = deepcopy(board)
