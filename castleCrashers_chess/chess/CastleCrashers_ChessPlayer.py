@@ -64,7 +64,42 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
     
         score = (white_evaluation - black_evaluation)
         return score
-    
+
+    #alpha beta pruning
+    def pruning(self, depth, alpha, beta, isMaximizing):
+        value = 0
+        #if the depth is 0 or it's a terminal state
+        #need to figure out how to check if it's in a terminal state
+        if (depth == 0):
+            #return the heuristic value
+            return value
+        #make a copy of the board and get the legal moves
+        boardcopy = deepcopy(self.board)
+        legal_moves = boardcopy.get_all_available_legal_moves(self.color)
+        #if the player is maximizing
+        if (isMaximizing):
+            #set value to a very low number
+            value = -1000000
+            #for each legal move
+            for x in legal_moves:
+                #move = boardcopy.make_move(x[0],x[1])
+                value = max(value, self.pruning((depth - 1), alpha, beta, False))
+                if value >= beta:
+                    break
+                alpha = max(alpha, value)
+            return value
+        else:
+            #set value to a really high number
+            value = 1000000
+            for x in legal_moves:
+                #move = boardcopy.make_move(x[0],x[1])
+                value = min(value, self.pruning((depth - 1), alpha, beta, True))
+                if value <= alpha:
+                    break
+                beta = min(beta, value)
+            return value
+
+
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
         #return random.choice(self.board.get_all_available_legal_moves(self.color))
         boardcopy = deepcopy(self.board)
@@ -96,7 +131,11 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             score = -1000000
         elif(board.is_king_in_checkmate("black")):
             score = 1000000
-        
+
+        alpha = 0
+        beta = 0
+        self.pruning(self.maxDepth, alpha, beta, isMaximizing)
+
         if (depth == self.maxDepth):
             evaluation = self.evalFunction(board)
             #print(evaluation)
