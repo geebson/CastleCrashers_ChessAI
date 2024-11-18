@@ -31,12 +31,12 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             startGame = False
     #if it's start game, add a bonus for piece maneuverability
         if (startGame):
-            num_moves_w = len(white_moves)
-            num_moves_b = len(black_moves)
-            if(num_moves_w > num_moves_b):
-                white_evaluation += 5
-            elif(num_moves_w < num_moves_b):
-                black_evaluation += 5
+            maneuverability_w = len(white_moves)/len(white_positions)#maneuverability is the ratio of moves to pieces
+            maneuverability_b = len(black_moves)/len(black_positions)
+            if(maneuverability_w > maneuverability_b):
+                white_evaluation += 7
+            elif(maneuverability_w < maneuverability_b):
+                black_evaluation += 7
     #Material Evaluation
         #loop through the pieces for each player, getting the type of pieces and summing their values
         for position in white_positions:
@@ -47,11 +47,12 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             else:
                 if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
                     white_evaluation += 2
-                #check if queen is safe
-                if (piece=='Q'):
-                    if(position in black_moves):
-                        white_evaluation -= 100
             value = self.piece_dictionary[piece]
+            #check if piece is safe
+            for opponent_move in black_moves:
+                if(opponent_move[1]==position):
+                    white_evaluation -= (value-1)
+                #add piece value
             white_evaluation += value
 
         for position in black_positions:
@@ -62,11 +63,12 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             else:
                 if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
                     black_evaluation += 2
-                #check if queen is safe
-                if (piece=='Q'):
-                    if(position in white_moves):
-                        black_evaluation -= 100
             value = self.piece_dictionary[piece]
+            #check if piece is safe
+            for opponent_move in white_moves:
+                if(opponent_move[1]==position):
+                    white_evaluation -= (value-1)
+            #add piece value
             black_evaluation += value
         
     #King's Defense evaluation
@@ -78,10 +80,10 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #if the king is in a castled position, give a bonus
         if (king_col_b=='b'or king_col_b=='c'or king_col_b=='f'or king_col_b=='g'):
             if (king_row_b=='7'or king_row_b=='8'):
-                black_evaluation += 10
+                black_evaluation += 8
         if (king_col_w=='b'or king_col_w=='c'or king_col_w=='f'or king_col_w=='g'):
             if (king_row_w=='1'or king_row_w=='2'):
-                white_evaluation += 10
+                white_evaluation += 8
         #get the row below the black king
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
         #check the 3 spaces around the king in that row
@@ -187,8 +189,8 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             bestscore = -1000000000000
             #set the best_moves for white to be the maximum 5 of sorted moves
             best_moves=sorted_moves
-            if (len(best_moves)>=5):
-                best_moves = best_moves[(len(sorted_moves))-5:]
+            if (len(best_moves)>=3):
+                best_moves = best_moves[(len(sorted_moves))-3:]
             for x in best_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
@@ -205,8 +207,8 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             bestscore = 1000000000000
             #set the best_moves for black to be the minimum 5 of sorted moves
             best_moves=sorted_moves
-            if (len(best_moves)>=5):
-                best_moves = best_moves[:5]
+            if (len(best_moves)>=3):
+                best_moves = best_moves[:3]
             for x in best_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
