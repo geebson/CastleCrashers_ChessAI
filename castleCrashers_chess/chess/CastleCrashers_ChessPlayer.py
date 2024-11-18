@@ -50,7 +50,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
                 #check if queen is safe
                 if (piece=='Q'):
                     if(position in black_moves):
-                        white_evaluation -= 90
+                        white_evaluation -= 100
             value = self.piece_dictionary[piece]
             white_evaluation += value
 
@@ -65,7 +65,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
                 #check if queen is safe
                 if (piece=='Q'):
                     if(position in white_moves):
-                        black_evaluation -= 90
+                        black_evaluation -= 100
             value = self.piece_dictionary[piece]
             black_evaluation += value
         
@@ -78,11 +78,9 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #if the king is in a castled position, give a bonus
         if (king_col_b=='b'or king_col_b=='c'or king_col_b=='f'or king_col_b=='g'):
             if (king_row_b=='7'or king_row_b=='8'):
-                print("Castle Bonus applied B")
                 black_evaluation += 10
         if (king_col_w=='b'or king_col_w=='c'or king_col_w=='f'or king_col_w=='g'):
             if (king_row_w=='1'or king_row_w=='2'):
-                print("Castle Bonus applied W")
                 white_evaluation += 10
         #get the row below the black king
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
@@ -141,6 +139,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             return value
 
 
+
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
         boardcopy = deepcopy(self.board)
         white_positions = boardcopy.all_occupied_positions('white')
@@ -153,11 +152,44 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             self.maxDepth=3
         else:
             self.maxDepth=1
-
+    #run a first evaluation and prioritize the moves based on their scores
         legal_moves = boardcopy.get_all_available_legal_moves(self.color)
+        sorted_evaluations = []
+        sorted_moves = []
+        #loop through all the moves
+        for move in legal_moves:
+            #make the move on a copy
+            boardcopy = deepcopy(self.board)
+            boardcopy.make_move(move[0],move[1])
+            #evaluate
+            new_evaluation = self.evalFunction(boardcopy)
+        #find where the evaluation fits into sorted list (sort least to greatest)
+            #loop through the length of sorted evaluataions
+            if(len(sorted_evaluations)==0):
+                sorted_evaluations.append(new_evaluation)
+                sorted_moves.append(move)
+            else:
+                isInserted=False
+                for i in range(len(sorted_evaluations)):
+                    #if it's less than or equal to
+                    if(new_evaluation<=sorted_evaluations[i]):
+                        #insert into sorted moves and evals based on index
+                        sorted_evaluations.insert(i,new_evaluation)
+                        sorted_moves.insert(i,move)
+                        isInserted=True
+                        break
+                #if it still hasn't been inserted, add to the end of the lists
+                if(isInserted==False):
+                    sorted_evaluations.append(new_evaluation)
+                    sorted_moves.append(move)
+    #once we have our sorted moves we want to call our minimax function on the best ones    
         if(self.color == 'white'):
             bestscore = -1000000000000
-            for x in legal_moves:
+            #set the best_moves for white to be the maximum 5 of sorted moves
+            best_moves=sorted_moves
+            if (len(best_moves)>=5):
+                best_moves = best_moves[(len(sorted_moves))-5:]
+            for x in best_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
                 if (boardcopy.is_king_in_checkmate('black')):
@@ -167,10 +199,15 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
                     if (score > bestscore):
                         bestscore = score
                         bestMove = x
-            return bestMove            
+            return bestMove 
+                   
         elif (self.color == 'black'):
             bestscore = 1000000000000
-            for x in legal_moves:
+            #set the best_moves for black to be the minimum 5 of sorted moves
+            best_moves=sorted_moves
+            if (len(best_moves)>=5):
+                best_moves = best_moves[:5]
+            for x in best_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
                 if (boardcopy.is_king_in_checkmate('white')):
