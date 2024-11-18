@@ -104,7 +104,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         #return random.choice(self.board.get_all_available_legal_moves(self.color))
         boardcopy = deepcopy(self.board)
         legal_moves = boardcopy.get_all_available_legal_moves(self.color)
-        print(legal_moves)
+        #print(legal_moves)
         if(self.color == 'white'):
             bestscore = -1000000000000
             for x in legal_moves:
@@ -134,7 +134,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
 
         alpha = 0
         beta = 0
-        self.pruning(self.maxDepth, alpha, beta, isMaximizing)
+        #self.pruning(self.maxDepth, alpha, beta, isMaximizing)
 
         if (depth == self.maxDepth):
             evaluation = self.evalFunction(board)
