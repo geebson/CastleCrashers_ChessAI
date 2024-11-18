@@ -13,23 +13,26 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         
         self.maxDepth = 1
 
-    #def queenSafe(self, board, color):
-       
 
     def evalFunction(self,board):
-
         white_positions = board.all_occupied_positions('white')
         black_positions = board.all_occupied_positions('black')
+        white_moves = board.get_all_available_legal_moves('white')
+        black_moves = board.get_all_available_legal_moves('black')
         white_evaluation=0
         black_evaluation=0
+        if (board.is_king_in_checkmate("white")):
+            black_evaluation += 1000000
+        elif(board.is_king_in_checkmate("black")):
+            white_evaluation += 1000000
     #add a quick check if it's start game or end game based on number of pieces
         startGame = True
         if (len(white_positions)<=12 or len(black_positions)<=12):
             startGame = False
     #if it's start game, add a bonus for piece maneuverability
         if (startGame):
-            num_moves_w = len(board.get_all_available_legal_moves('white'))
-            num_moves_b = len(board.get_all_available_legal_moves('black'))
+            num_moves_w = len(white_moves)
+            num_moves_b = len(black_moves)
             if(num_moves_w > num_moves_b):
                 white_evaluation += 5
             elif(num_moves_w < num_moves_b):
@@ -44,6 +47,10 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             else:
                 if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
                     white_evaluation += 2
+                #check if queen is safe
+                if (piece=='Q'):
+                    if(position in black_moves):
+                        white_evaluation -= 90
             value = self.piece_dictionary[piece]
             white_evaluation += value
 
@@ -55,6 +62,10 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             else:
                 if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
                     black_evaluation += 2
+                #check if queen is safe
+                if (piece=='Q'):
+                    if(position in white_moves):
+                        black_evaluation -= 90
             value = self.piece_dictionary[piece]
             black_evaluation += value
         
