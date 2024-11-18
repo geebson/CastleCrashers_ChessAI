@@ -7,7 +7,7 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
     def __init__(self, board, color):
         super().__init__(board,color)
         #map a dictionary for all of the piece values
-        self.piece_dictionary = {'P': 10,'N': 30,'B': 30,'R': 50,'Q': 90,'K': 10000}
+        self.piece_dictionary = {'P': 10,'N': 30,'B': 30,'R': 50,'Q': 90,'K': 10000000}
         self.column_array = ['a','b','c','d','e','f','g','h']
         self.row_array = ['1','2','3','4','5','6','7','8']
         
@@ -16,9 +16,20 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
 
         white_positions = board.all_occupied_positions('white')
         black_positions = board.all_occupied_positions('black')
-        print(black_positions)
         white_evaluation=0
         black_evaluation=0
+    #add a quick check if it's start game or end game based on number of pieces
+        startGame = True
+        if (len(white_positions)<=12 or len(black_positions)<=12):
+            startGame = False
+    #if it's start game, add a bonus for piece maneuverability
+        if (startGame):
+            num_moves_w = len(board.get_all_available_legal_moves('white'))
+            num_moves_b = len(board.get_all_available_legal_moves('black'))
+            if(num_moves_w > num_moves_b):
+                white_evaluation += 5
+            elif(num_moves_w < num_moves_b):
+                black_evaluation += 5
     #Material Evaluation
         #loop through the pieces for each player, getting the type of pieces and summing their values
         for position in white_positions:
@@ -26,6 +37,9 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             piece = piece.get_notation().upper()
             if (piece == 'K'): #save the position of the king to use for evaluation later
                 king_position_w = position
+            else:
+                if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
+                    white_evaluation += 2
             value = self.piece_dictionary[piece]
             white_evaluation += value
 
@@ -34,6 +48,9 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             piece = piece.get_notation().upper()
             if (piece == 'K'):
                 king_position_b = position
+            else:
+                if(position=='e4'or position=='e5'or position=='d4'or position=='d5'):#give a 2 point bonus for center control
+                    black_evaluation += 2
             value = self.piece_dictionary[piece]
             black_evaluation += value
         
@@ -43,6 +60,15 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         king_col_b = king_position_b[0]
         king_row_w = king_position_w[1]
         king_col_w = king_position_w[0]
+        #if the king is in a castled position, give a bonus
+        if (king_col_b=='b'or king_col_b=='c'or king_col_b=='f'or king_col_b=='g'):
+            if (king_row_b=='7'or king_row_b=='8'):
+                print("Castle Bonus applied B")
+                black_evaluation += 10
+        if (king_col_w=='b'or king_col_w=='c'or king_col_w=='f'or king_col_w=='g'):
+            if (king_row_w=='1'or king_row_w=='2'):
+                print("Castle Bonus applied W")
+                white_evaluation += 10
         #get the row below the black king
         defense_row_b = self.row_array[(self.row_array.index(king_row_b))-1]
         #check the 3 spaces around the king in that row
@@ -101,8 +127,18 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
 
 
     def get_move(self,your_remaining_time, opp_remaining_time, prog_stuff):
-        #return random.choice(self.board.get_all_available_legal_moves(self.color))
         boardcopy = deepcopy(self.board)
+        white_positions = boardcopy.all_occupied_positions('white')
+        black_positions = boardcopy.all_occupied_positions('black')
+        if (len(white_positions)==16 and len(black_positions)==16):
+            self.maxDepth=0
+        elif (len(white_positions)<=6 or len(black_positions)<=6):#close to endgame
+            self.maxDepth=2
+        elif (len(white_positions)<=3 or len(black_positions)<=3):#endgame
+            self.maxDepth=3
+        else:
+            self.maxDepth=1
+
         legal_moves = boardcopy.get_all_available_legal_moves(self.color)
         #print(legal_moves)
         if(self.color == 'white'):
