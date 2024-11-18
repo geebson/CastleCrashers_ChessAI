@@ -12,6 +12,10 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
         self.row_array = ['1','2','3','4','5','6','7','8']
         
         self.maxDepth = 1
+
+    #def queenSafe(self, board, color):
+       
+
     def evalFunction(self,board):
 
         white_positions = board.all_occupied_positions('white')
@@ -140,26 +144,31 @@ class CastleCrashers_ChessPlayer(ChessPlayer):
             self.maxDepth=1
 
         legal_moves = boardcopy.get_all_available_legal_moves(self.color)
-        #print(legal_moves)
         if(self.color == 'white'):
             bestscore = -1000000000000
             for x in legal_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
-                score = self.minimax(boardcopy, 0,True)
-                if (score > bestscore):
-                    bestscore = score
-                    bestMove = x
+                if (boardcopy.is_king_in_checkmate('black')):
+                    return x
+                else:
+                    score = self.minimax(boardcopy, 0,True)
+                    if (score > bestscore):
+                        bestscore = score
+                        bestMove = x
             return bestMove            
         elif (self.color == 'black'):
             bestscore = 1000000000000
             for x in legal_moves:
                 boardcopy = deepcopy(self.board)
                 boardcopy.make_move(x[0],x[1])
-                score = self.minimax(boardcopy, 0,False)
-                if (score < bestscore):
-                    bestscore = score
-                    bestMove = x
+                if (boardcopy.is_king_in_checkmate('white')):
+                    return x
+                else:
+                    score = self.minimax(boardcopy, 0,False)
+                    if (score < bestscore):
+                        bestscore = score
+                        bestMove = x
             return bestMove            
                 
     def minimax(self, board, depth, isMaximizing):
